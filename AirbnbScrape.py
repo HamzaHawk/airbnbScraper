@@ -18,42 +18,72 @@ class AirbnbScraper(object):
         self.soup = BeautifulSoup(page.content, "lxml")
         
     def get_listing_name(self):
+        '''
+            returns the name of the listing.
+        '''
         listing_name = self.soup.find(name="h1", attrs={"id":"listing_name"}).text.encode('utf-8')
         return(listing_name)
         
     def get_host_name(self):
+        '''
+            returns the name of the listing's host.
+        '''
         host_name = self.soup.find(name="a", attrs={"href":"#host-profile", "class":"link-reset text-wrap"}).text.encode('utf-8')
         return(host_name)
 
     def get_number_of_reviews(self):
+        '''
+            returns the number of reviews for the listing.
+        '''
         number_of_reviews = int(self.soup.find(name="span", attrs={"itemprop":"reviewCount"}).text.encode('utf-8'))
         return(number_of_reviews)
     
     def get_rating(self):
+        '''
+            returns the current rating of the listing.
+        '''
         rating = float(self.soup.find(name="div", attrs={"class":"star-rating", "itemprop":"ratingValue"})['content'].encode('utf-8'))
         return(rating)
     
     def get_neighborhood(self):
+        '''
+            returns the neighborhood of the listing.
+        '''
         neighborhood = self.soup.find(name="a", attrs={"href":"#neighborhood", "class":"link-reset"}).text.encode('utf-8')
         return(neighborhood)
 
     def get_price(self):
+        '''
+            returns the price of the listing.
+        '''
         price = float(self.soup.find(name="span", attrs={"class":"h3"}).text.encode('utf-8').strip('$'))
         return(price)
     
     def is_instant_book(self):
+        '''
+            returns 1 if the Instant Book option is available for the listing, 0 otherwise.
+        '''
         isInstantBook = 1 if(self.soup.find(name="i", attrs={"class":"icon icon-instant-book icon-beach h4 book-it__instant-book-price-icon"}) is not None) else 0
         return(isInstantBook)
 
     def is_superhost(self):
+        '''
+            returns 1 if the listing's host is a Super Host, 0 otherwise.
+        '''
         isSuperHost = 1 if(self.soup.find(name="img", attrs={"class":"superhost-photo-badge superhost-photo-badge"}) is not None) else 0
         return(isSuperHost)  
         
     def is_verified(self):
+        '''
+            returns 1 the listing's host has a verified profile on Airbnb, 0 otherwise.
+        '''
         isVerified = 1 if(self.soup.find(name="img", attrs={"alt":"Verified"}) is not None) else 0
         return(isVerified)
 
-    def get_review_scores(self):       
+    def get_review_scores(self): 
+        '''
+            returns the review scores of the listing.
+        '''
         scores_list = []
         review = self.soup.find(name="div", attrs={"class":"review-inner space-top-2 space-2"})
         review_scores = review.find_all(name="div", attrs={"class":"col-lg-6"})
@@ -63,45 +93,43 @@ class AirbnbScraper(object):
                 value = child.find(name="div", attrs={"class":"star-rating"})['content']
                 scores_list.append({key:value})
         return(scores_list)
-
+    
+    def get_count_saved(self):
+        '''
+            returns the count of the number of travelers who've saved the listing.
+        '''
+        count_saved = int(self.soup.find(name="span", attrs={"class":"wishlist-button-subtitle-text"}).text.encode('utf-8').strip(' travelers saved this place\n'))
+        return(count_saved)
+    
         
-scraper = AirbnbScraper('755528')
+    def get_details(self, tag):
+        '''
+            if the argument 'tag' is set to "prices", the method returns the details of the 'Prices' section of the page. 
+            Details of "The Space" section are returned otherwise.
+        '''
+        index = 2 if(tag == "prices") else 0
+        details = {}
+        price_list = self.soup.find_all(name="div", attrs={"class":"col-md-3 text-muted"})[index].find_next_siblings("div")[0]
+        for i in price_list.select("div > div > div"):
+            text = i.text.encode('utf-8').split(':')
+            details[text[0]] = text[1].strip()
+        return(details)
+
+    def get_availability(self):
+        '''
+            returns the minimum nights stay
+        '''
+        div = self.soup.find_all(name="div", attrs={"class":"col-md-3 text-muted"})[-2].find_next_siblings("div")[0]
+        availability = int(div.select("strong")[0].text.encode('utf-8').strip(" nights"))
+        return(availability)
+
+
+                
+scraper = AirbnbScraper('13303942')
 
 scraper.get_review_scores()
 
-scraper.get_number_of_reviews()
-
-
-
-scraper.soup.findChild(name="span")
-
-page = requests.get('https://www.airbnb.com/rooms/755528')
+page = requests.get('https://www.airbnb.com/rooms/4795922')
 soup = BeautifulSoup(page.content, "lxml")
-soup.get
-
-for i in soup.find_all(name="div", attrs={"class":"col-md-9 expandable"}):
-    print i, '\n\n'
 
 
-
-div1 = soup.find_all(name="div", attrs={"class":"row amenities"})
-
-expandable = div1[0].find_all(name="div", attrs={"class":"col-md-9 expandable"})
-
-expandable_full = expandable[0].find_all(name="div", attrs={"class":"expandable-content expandable-content-full"})
-
-for i in expandable:
-    print i.prettify()
-    print '\n\n'
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-l = []
-l.append({'Check In':4.5})
