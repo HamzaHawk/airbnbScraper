@@ -3,7 +3,7 @@
 """
 Created on Fri Oct  7 14:00:50 2016
 
-@author: nandu
+@author: abhinandan
 """
 
 import requests
@@ -35,15 +35,23 @@ class AirbnbScraper(object):
         '''
             returns the number of reviews for the listing.
         '''
-        number_of_reviews = int(self.soup.find(name="span", attrs={"itemprop":"reviewCount"}).text.encode('utf-8'))
-        return(number_of_reviews)
+        span = self.soup.find(name="span", attrs={"itemprop":"reviewCount"})
+        if(span is not None):
+            number_of_reviews = int(span.text.encode('utf-8'))
+            return(number_of_reviews)
+        else:
+            return(0)
     
     def get_rating(self):
         '''
             returns the current rating of the listing.
         '''
-        rating = float(self.soup.find(name="div", attrs={"class":"star-rating", "itemprop":"ratingValue"})['content'].encode('utf-8'))
-        return(rating)
+        div = self.soup.find(name="div", attrs={"class":"star-rating", "itemprop":"ratingValue"})
+        if(div is not None):
+            rating = float(div['content'].encode('utf-8'))
+            return(rating)
+        else:
+            return(None)
     
     def get_neighborhood(self):
         '''
@@ -86,20 +94,27 @@ class AirbnbScraper(object):
         '''
         scores_list = []
         review = self.soup.find(name="div", attrs={"class":"review-inner space-top-2 space-2"})
-        review_scores = review.find_all(name="div", attrs={"class":"col-lg-6"})
-        for item in review_scores: 
-            for child in item.children:
-                key = child.text.encode('utf-8').strip()
-                value = child.find(name="div", attrs={"class":"star-rating"})['content']
-                scores_list.append({key:value})
-        return(scores_list)
+        if(review is not None):
+            review_scores = review.find_all(name="div", attrs={"class":"col-lg-6"})
+            for item in review_scores: 
+                for child in item.children:
+                    key = child.text.encode('utf-8').strip()
+                    value = child.find(name="div", attrs={"class":"star-rating"})['content']
+                    scores_list.append({key:value})
+            return(scores_list)
+        else: 
+            return(None)
     
     def get_count_saved(self):
         '''
             returns the count of the number of travelers who've saved the listing.
         '''
-        count_saved = int(self.soup.find(name="span", attrs={"class":"wishlist-button-subtitle-text"}).text.encode('utf-8').strip(' travelers saved this place\n'))
-        return(count_saved)
+        span = self.soup.find(name="span", attrs={"class":"wishlist-button-subtitle-text"})
+        if(span is not None):
+            count_saved = int(span.text.encode('utf-8').strip(' travelers saved this place\n'))
+            return(count_saved)
+        else:
+            return(0)
     
         
     def get_details(self, tag):
@@ -119,17 +134,25 @@ class AirbnbScraper(object):
         '''
             returns the minimum nights stay
         '''
-        div = self.soup.find_all(name="div", attrs={"class":"col-md-3 text-muted"})[-2].find_next_siblings("div")[0]
-        availability = int(div.select("strong")[0].text.encode('utf-8').strip(" nights"))
-        return(availability)
+        divs = self.soup.find_all(name="div", attrs={"class":"col-md-3 text-muted"})
+        for div in reversed(divs):
+            if(div.text.encode('utf-8')=="Availability"):
+                sibling = div.find_next_siblings("div")[0]
+                availability = int(sibling.select("strong")[0].text.encode('utf-8').strip(" nights"))
+                return(availability)
 
 
                 
-scraper = AirbnbScraper('13303942')
+scraper = AirbnbScraper('755528')
 
-scraper.get_review_scores()
+scraper.get_neighborhood()
 
-page = requests.get('https://www.airbnb.com/rooms/4795922')
+
+
+
+page = requests.get('https://www.airbnb.com/rooms/sdasd24234')
+
+scraper.is_verified()
+
 soup = BeautifulSoup(page.content, "lxml")
-
 
