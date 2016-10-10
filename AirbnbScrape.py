@@ -9,7 +9,7 @@ Created on Fri Oct  7 14:00:50 2016
 import requests
 from bs4 import BeautifulSoup
 
-class AirbnbScraper(object):
+class ListingScraper(object):
     
     def __init__(self, _id):
         self.url = 'https://www.airbnb.com/rooms/'+_id
@@ -96,15 +96,15 @@ class AirbnbScraper(object):
         '''
             returns the review scores of the listing.
         '''
-        scores_list = []
+        scores_list = {}
         div = self.soup.find(name="div", attrs={"class":"review-inner space-top-2 space-2"})
         if(div is not None):
             divs = div.find_all(name="div", attrs={"class":"col-lg-6"})
             for div in divs: 
                 for child in div.children:
                     key = child.text.encode('utf-8').strip()
-                    value = child.find(name="div", attrs={"class":"star-rating"})['content']
-                    scores_list.append({key:value})
+                    value = float(child.find(name="div", attrs={"class":"star-rating"})['content'])
+                    scores_list[key] = value
             return(scores_list)
         else: 
             return(None)
@@ -142,21 +142,9 @@ class AirbnbScraper(object):
         for div in reversed(divs):
             if(div.text.encode('utf-8')=="Availability"):
                 sibling = div.find_next_siblings("div")[0]
-                availability = int(sibling.select("strong")[0].text.encode('utf-8').strip(" nights"))
+                availability = sibling.text.strip('.View Calendar').encode('utf-8')
                 return(availability)
 
-
                 
-scraper = AirbnbScraper('755528')
-scraper = AirbnbScraper('12791130')
-
-scraper.get_review_scores()
-
-
-
-
-page = requests.get('https://www.airbnb.com/rooms/4116501abcd')
-
-soup = BeautifulSoup(page.content, "lxml")
-
-
+#scraper = ListingScraper('5557381')
+#scraper = AirbnbScraper('12791130')
