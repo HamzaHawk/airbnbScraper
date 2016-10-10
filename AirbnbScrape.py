@@ -11,12 +11,16 @@ from bs4 import BeautifulSoup
 
 class AirbnbScraper(object):
     
-    def __init__(self, id):
-        #add exception handling
-        self.url = 'https://www.airbnb.com/rooms/'+id
+    def __init__(self, _id):
+        self.url = 'https://www.airbnb.com/rooms/'+_id
         page = requests.get(self.url)
-        self.soup = BeautifulSoup(page.content, "lxml")
-        
+        soup = BeautifulSoup(page.content, "lxml")
+        page_title = soup.title.text
+        if(not(page_title.startswith('Top 20')) and not(page_title.startswith('Page not found'))):
+            self.soup = soup
+        else:
+            self.soup = None
+                
     def get_listing_name(self):
         '''
             returns the name of the listing.
@@ -93,11 +97,11 @@ class AirbnbScraper(object):
             returns the review scores of the listing.
         '''
         scores_list = []
-        review = self.soup.find(name="div", attrs={"class":"review-inner space-top-2 space-2"})
-        if(review is not None):
-            review_scores = review.find_all(name="div", attrs={"class":"col-lg-6"})
-            for item in review_scores: 
-                for child in item.children:
+        div = self.soup.find(name="div", attrs={"class":"review-inner space-top-2 space-2"})
+        if(div is not None):
+            divs = div.find_all(name="div", attrs={"class":"col-lg-6"})
+            for div in divs: 
+                for child in div.children:
                     key = child.text.encode('utf-8').strip()
                     value = child.find(name="div", attrs={"class":"star-rating"})['content']
                     scores_list.append({key:value})
@@ -144,15 +148,15 @@ class AirbnbScraper(object):
 
                 
 scraper = AirbnbScraper('755528')
+scraper = AirbnbScraper('12791130')
 
-scraper.get_neighborhood()
+scraper.get_review_scores()
 
 
 
 
-page = requests.get('https://www.airbnb.com/rooms/sdasd24234')
-
-scraper.is_verified()
+page = requests.get('https://www.airbnb.com/rooms/4116501abcd')
 
 soup = BeautifulSoup(page.content, "lxml")
+
 
