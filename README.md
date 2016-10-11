@@ -26,7 +26,8 @@ The scraper returns the following details:
   
 How to run:
 
-  $python run.py -i  I
-    -i  -   id of the airbnb listing
+    $python run.py -i  I
+    
+      -i  -   id of the airbnb listing
   
   
