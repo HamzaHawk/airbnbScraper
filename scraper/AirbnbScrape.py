@@ -144,7 +144,3 @@ class ListingScraper(object):
                 sibling = div.find_next_siblings("div")[0]
                 availability = sibling.text.strip('.View Calendar').encode('utf-8')
                 return(availability)
-
-                
-scraper = ListingScraper('7927466')
-#scraper = AirbnbScraper('12791130')
