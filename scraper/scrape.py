@@ -51,12 +51,3 @@ def scrape_data(_id):
         return(d)
     else:
         return(None)
-                
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", required=True, help="Airbnb listing id")
-    args = parser.parse_args()
-    
-    x = scrape_data(args.i)
-    for a,b in enumerate(x):
-        print a,b,' : ',x[b]
